@@ -3,7 +3,7 @@
 #Based on the Seurat tutorial 'Cell-Cycle Scoring and Regression'
 #Reference: https://satijalab.org/seurat/v3.0/cell_cycle_vignette.html
 #Ignore lines starting w/ '##' as they merely explain R grammer
-#USAGE: Rscript cell_cycle_seurat.R -i /home/tissei/Mkyoko/RNA/output/190709_Hiseq3000_PC9_parent_scRNA_5prime/outs/filtered_feature_bc_matrix -o output/ 
+#USAGE: Rscript cell_cycle_seurat.R -i /path/to/filtered_feature_bc_matrix -o /path/to/output/ 
 
 library(Seurat)
 library(optparse)
