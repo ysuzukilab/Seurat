@@ -31,12 +31,12 @@ option_list <- list(
 	make_option(c('-m','--percent.mt'),type='integer',default=5,help='[Preprocessing; Filtering data] Maximum percentage of mitochondria genome. Higher percent.mt indicates dead cell [default 5]', metavar='number'),
 	make_option(c('-d','--pca_dims'),type='integer',default=10,help='[Clustering/Dimensionality reduction] Number of principal components to use. Cf. pca_jackstraw.png, pca_elbowPlot.png [default 10]', metavar='number'),
 	make_option(c('-j','--jackstrawed'),type='character',default='',help='[Resume] Set RDS file name (and the path to that file) if you want to use previously calculated JackStraw results (e.g. *_jackstrawed.rds) [default FALSE]',metavar='character'),
-	make_option(c('--deg'),type='character',default='',help='[Resume] Set RDS file name (and the path to that file) if you want to use previously calculated results (e.g. *_final.rds) [default FALSE]',metavar='character')
+	make_option(c('--deg'),type='character',default='',help='[Resume] Set RDS file name (and the path to that file) if you want to use previously calculated results and resume from finding DEGs(e.g. *_final.rds) [default FALSE]',metavar='character'),
 	make_option(c('-g','--marker_genes'),type='character',default='',help='[Finding DEGs] path/name of textfile that contains custom marker genes', metavar='character'),
 	make_option(c('-c','--cluster_id'),type='character',default='',help='[Assigning cell type identity] path/name of textfile that contains custom cluster IDs', metavar='character'),
 	make_option(c('--marker_threshold'),type='integer',default=0,help='[Finding biomarkers] avg_logFC threshold  [default FALSE]',metavar='number'),
 	make_option(c('--marker_numbers'),type='integer',default=0,help='[Finding biomarkers] Top n genes to retreive as marker candidate   [default 10]',metavar='number'),
-	make_option(c('-f','--find_marker'),action='store_true',default=FALSE,help='[Finding biomarkers] Plot all Marker candidates in seperate scatter plot [default FALSE]'),
+	make_option(c('-f','--find_marker'),action='store_true',default=FALSE,help='[Finding biomarkers] Plot all Marker candidates in seperate scatter plot [default FALSE]')
 )
 
 opt <- parse_args(OptionParser(option_list=option_list))
@@ -212,10 +212,13 @@ write_to_output <- function(sample){
 	#Gene - Cell Phenotype matrix
 	oldnames = colnames(sample@assays$RNA@counts)
 	newnames <- c()
+	#Review the following rows!
 	for(barcode in oldnames){
-		newnames <- append(newnames,sample@active.ident[barcode])#factor (dct-like) of barcode-phenotype: sample@active.ident
+		newnames <- append(newnames,as.character(sample@active.ident[barcode]))#factor (dct-like) of barcode-phenotype: sample@active.ident
 	}
-	sample@assays$RNA@counts %>% rename_at(vars(oldnames), ~ newnames)
+	df = as.data.frame(sample@assays$RNA@counts)
+	names(df) <- newnames
+	#sample@assays$RNA@counts %>% rename_at(vars(oldnames), ~ newnames)
 	write.table(df,file=paste(out.dir,opt$project_name,'_cell_expression.tsv',sep=''),sep='\t',na='',row.names=T,col.names=NA,quote=F)
 }
 
