@@ -8,7 +8,7 @@ install.packages('dplyr')
 install.packages('Seurat')
 install.packages('optparse')
 install.packages('ggpubr')
-install.packages('cowplot)
+install.packages('cowplot')
 install.packages('grid')
 install.packages('ggplot2')
 install.packages('hdf5r')
@@ -128,6 +128,27 @@ cell_cycle_seurat.R automates the analysis shown in the [Seurat tutorial](https:
 ```Bash
 $ Rscript cell_cycle_seurat.R -i /path/to/input_dir/ -o /path/to/output_dir/
 ```  
+
+## Integrating datasets
+integration_seurat.R automates the analysis shown in the [Seurat tutorial](https://satijalab.org/seurat/v3.0/immune_alignment.html 'Tutorial: Integrating stimulated vs. control PBMC datasets to learn cell-type specific responses').
+
+### Input  
+10x chromium output files.    
+./input_dir  
+	├--- barcodes.tsv.gz  
+	├--- features.tsv.gz  
+	└--- matrix.mtx.gz  
+### Output  
+- .png format plots  
+- .tsv files 
+- .RDS files
+
+## Usage  
+### Basic usage      
+```Bash
+$ Rscript integration_seurat.R --input_dir1 /path/to/dir1/ --input_dir2 /path/to/dir2/ -o /path/to/output -n1 name1 -n2 name2 -n 'custom_project_name'
+```  
+
 
 
 
