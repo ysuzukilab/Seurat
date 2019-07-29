@@ -134,14 +134,19 @@ integration_seurat.R automates the analysis shown in the [Seurat tutorial](https
 
 ### Input  
 10x chromium output files.    
-./input_dir  
+./input_dir1  
 	├--- barcodes.tsv.gz  
 	├--- features.tsv.gz  
 	└--- matrix.mtx.gz  
+./input_dir2  
+	├--- barcodes.tsv.gz  
+	├--- features.tsv.gz  
+	└--- matrix.mtx.gz  
+
 ### Output  
 - .png format plots  
 - .tsv files 
-- .RDS files
+- .rds files
 
 ## Usage  
 ### Basic usage      
