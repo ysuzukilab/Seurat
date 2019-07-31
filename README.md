@@ -12,8 +12,9 @@ install.packages('cowplot')
 install.packages('grid')
 install.packages('ggplot2')
 install.packages('hdf5r')
-
 ```
+Downloading the package "hdf5r" may not work on ssh.
+
 
 ## 10x chromium single cell analysis
 10x_seurat.R automates the analysis shown in the [Seurat tutorial](https://satijalab.org/seurat/v3.0/pbmc3k_tutorial.html 'Seurat pbmc tutorial').  
@@ -133,7 +134,7 @@ $ Rscript cell_cycle_seurat.R -i /path/to/input_dir/ -o /path/to/output_dir/
 integration_seurat.R automates the analysis shown in the [Seurat tutorial](https://satijalab.org/seurat/v3.0/immune_alignment.html 'Tutorial: Integrating stimulated vs. control PBMC datasets to learn cell-type specific responses').
 
 ### Input  
-10x chromium output files.    
+Two 10x chromium output files.    
 ./input_dir1  
 	├--- barcodes.tsv.gz  
 	├--- features.tsv.gz  
@@ -153,6 +154,27 @@ integration_seurat.R automates the analysis shown in the [Seurat tutorial](https
 ```Bash
 $ Rscript integration_seurat.R --input_dir1 /path/to/dir1/ --input_dir2 /path/to/dir2/ -o /path/to/output -n1 name1 -n2 name2 -n 'custom_project_name'
 ```  
+
+## Integrating scATAC and scRNA
+atac_integration_seurat.R automates the analysis shown in the [Seurat tutorial](https://satijalab.org/seurat/v3.0/atacseq_integration_vignette.html 'PBMC scATAC-seq Vignette').
+
+### Input  
+- peak_matrix.h5 file
+- .gtf file
+- singlecell.csv file
+- scRNA.rds file
+
+### Output  
+- .png format plots  
+- .txt files 
+- .rds files
+
+## Usage  
+### Basic usage      
+```Bash
+$ Rscript atac_integration_seurat.R -a path/to/peak_bc_matrix.h5 -b path/to/gtf -c path/to/singlecell.csv -r path/to/scRNA.rds -o 'custom_ouput_name' -n 'custom_project_name'
+```  
+
 
 
 
