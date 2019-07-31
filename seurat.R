@@ -2,7 +2,7 @@
 
 #This script runs Seurat and generates plots and input matrices for cibersort
 #Based on the Seurat tutorial 'Guided Clustering Tutorial (2,700 PBMCs)'
-#    Reference: https://satijalab.org/seurat/v3.0/pbmc3k_tutorial.html
+#Reference: https://satijalab.org/seurat/v3.0/pbmc3k_tutorial.html
 
 #USAGE: Rscript  seurat.R -i input_dir/ -o output_dir/ 
 
@@ -191,73 +191,73 @@ find_DEG <- function(sample){
 }
 
 assign_cellType_to_cluster <- function(sample){
-	#Assign cell type identity to clusters	
-	new.cluster.ids <- scan(opt$cluster_id,character())
-	names(new.cluster.ids) <- levels(sample)
-	sample <- RenameIdents(sample, new.cluster.ids)
+    #Assign cell type identity to clusters	
+    new.cluster.ids <- scan(opt$cluster_id,character())
+    names(new.cluster.ids) <- levels(sample)
+    sample <- RenameIdents(sample, new.cluster.ids)
 
-	#Scatter plot coloured by cell phenotype/cluster
+    #Scatter plot coloured by cell phenotype/cluster
     png(filename=paste(out.dir,"celltype_scatter.png",sep=''))
-	plot(DimPlot(sample, reduction = "umap", label = TRUE, pt.size = 0.5) + NoLegend())
-	dev.off()
+    plot(DimPlot(sample, reduction = "umap", label = TRUE, pt.size = 0.5) + NoLegend())
+    dev.off()
 
-	print('Assigning cell type to cluster - DONE')
-	return(sample)
+    print('Assigning cell type to cluster - DONE')
+    return(sample)
 }
 
 write_to_output <- function(sample){
-	#Barcode - Phenotype list
-	write.table(Idents(sample),file=paste(out.dir,opt$project_name,'_cell_ID_phenotype.tsv',sep=''),sep='\t',na='',row.names=T,col.names=NA,quote=F)
+    #Barcode - Phenotype list
+    write.table(Idents(sample),file=paste(out.dir,opt$project_name,'_cell_ID_phenotype.tsv',sep=''),sep='\t',na='',row.names=T,col.names=NA,quote=F)
 
-	#Gene - Cell Phenotype matrix
-	oldnames = colnames(sample@assays$RNA@counts)
-	newnames <- c()
-	#Review the following rows!
-	for(barcode in oldnames){
-		newnames <- append(newnames,as.character(sample@active.ident[barcode]))#factor (dct-like) of barcode-phenotype: sample@active.ident
-	}
-	df = as.data.frame(sample@assays$RNA@counts)
-	names(df) <- newnames
-	#sample@assays$RNA@counts %>% rename_at(vars(oldnames), ~ newnames)
-	write.table(df,file=paste(out.dir,opt$project_name,'_cell_expression.tsv',sep=''),sep='\t',na='',row.names=T,col.names=NA,quote=F)
+    #Gene - Cell Phenotype matrix
+    oldnames = colnames(sample@assays$RNA@counts)
+    newnames <- c()
+    #Review the following rows!
+    for(barcode in oldnames){
+        newnames <- append(newnames,as.character(sample@active.ident[barcode]))#factor (dct-like) of barcode-phenotype: sample@active.ident
+    }
+    df = as.data.frame(sample@assays$RNA@counts)
+    names(df) <- newnames
+    #sample@assays$RNA@counts %>% rename_at(vars(oldnames), ~ newnames)
+    write.table(df,file=paste(out.dir,opt$project_name,'_cell_expression.tsv',sep=''),sep='\t',na='',row.names=T,col.names=NA,quote=F)
 }
 
 main <- function(){
-	if (opt$deg != ''){
-		#Resume from finding Differentially Expressed Genes (DEGs)
-		print('resuming...')
-		sample <- readRDS(file=opt$deg)
-	}else if (opt$jackstrawed == ''){
-		#Start a fresh analysis from Step one!
-    	# Load the PBMC dataset
-    	sample.data <- Read10X(data.dir = data.directory)
-    	# Initialize the Seurat object with the raw (non-normalized data).
-    	sample <- CreateSeuratObject(counts = sample.data, project = opt$project_name, min.cells = 3, min.features = 200)
-    	sample = pre_processing(sample)
-		if (opt$visualise_rawdata == TRUE){
-			print('DONE! Raw data has been visualised.')
-			print('Next: Determine cutoff values.Then run the same script without --visualise_rawdata')
-			return()
-		}
-		sample = run_pca(sample)
-		sample = cluster(sample)
+    if (opt$deg != ''){
+        #Resume from finding Differentially Expressed Genes (DEGs)
+        print('resuming...')
+        sample <- readRDS(file=opt$deg)
+    }else if (opt$jackstrawed == ''){
+        #Start a fresh analysis from Step one!
+        # Load the PBMC dataset
+        sample.data <- Read10X(data.dir = data.directory)
+        # Initialize the Seurat object with the raw (non-normalized data).
+        sample <- CreateSeuratObject(counts = sample.data, project = opt$project_name, min.cells = 3, min.features = 200)
+        sample = pre_processing(sample)
+        if (opt$visualise_rawdata == TRUE){
+            print('DONE! Raw data has been visualised.')
+            print('Next: Determine cutoff values.Then run the same script without --visualise_rawdata')
+            return()
+    }
+        sample = run_pca(sample)
+        sample = cluster(sample)
         sample = Dimensionality_reduction(sample,'umap')
-	}else{
-		#Resume from after Jackstraw calculation
-		print('resuming...')
-		sample <- readRDS(file=opt$jackstrawed)
-		sample = cluster(sample)
+    }else{
+        #Resume from after Jackstraw calculation
+        print('resuming...')
+        sample <- readRDS(file=opt$jackstrawed)
+        sample = cluster(sample)
         sample = Dimensionality_reduction(sample,'umap')
-	}
-	sample = find_DEG(sample)
-	if (opt$cluster_id != ''){
-		sample = assign_cellType_to_cluster(sample)
-	}
-	saveRDS(sample,file=paste(out.dir,opt$project_name,'_final.rds',sep=''))
-	write_to_output(sample)
-	print('ANALYSIS COMPLETE!')
+    }
+    sample = find_DEG(sample)
+    if (opt$cluster_id != ''){
+        sample = assign_cellType_to_cluster(sample)
+    }
+    saveRDS(sample,file=paste(out.dir,opt$project_name,'_final.rds',sep=''))
+    write_to_output(sample)
+    print('ANALYSIS COMPLETE!')
 
-	print('*****Ignore error message about as.character() being deprecated*****')
+    print('*****Ignore error message about as.character() being deprecated*****')
 }
 
 main()
