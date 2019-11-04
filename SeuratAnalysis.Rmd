@@ -1,0 +1,258 @@
+---
+title: "Seurat Analysis"
+author: "Issei Tsuchiya"
+date: '`r format(Sys.time(), "%y/%m/%d %H:%M")`'
+output: 
+  html_document:
+    fig_caption: yes
+    number_sections: yes
+    pandoc_args:
+      - --from
+      - markdown+autolink_bare_uris+tex_math_single_backslash-implicit_figures
+    theme: default
+    toc: yes
+    toc_depth: 3
+params:
+  arg01: mca #library name: tenx, dropseq, mca
+  arg02: GSM2906472_Stomach_dge.txt #10X directory, dropseq / mca count matrix
+  arg03: MCA_stomach #project name
+  arg04: MCA_stomach_FA.rds  #output file name for saveRDS function
+  arg05: 50 #nFeature_RNA_min
+  arg06: 2500 #nFeature_RNA_max
+  arg07: 50 #nCount_RNA_min
+  arg08: 10000 #nCount_RNA_max
+  arg09: 60 #percent.mt_max
+  arg10: 20 #maximum PC
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(dplyr)
+library(Seurat)
+library(reticulate)
+library(scales)
+library(DT)
+
+set.seed(1234)
+#options(scipen=5)
+
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(eval = TRUE)
+knitr::opts_chunk$set(tidy = TRUE)
+knitr::opts_chunk$set(warning = TRUE)
+knitr::opts_chunk$set(error = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(fig.align = "center")
+```
+
+# Description
+
+This is an R Markdown document for Seurat Analysis. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+# Loading the Dataset
+
+You have chosen
+
+- **`r params$arg01`** as your library
+- **`r params$arg02`** as 10X directory or count matrix
+- **`r params$arg03`** as your project name
+- **`r params$arg04`** as output file name.
+
+The output below shows the number of features and samples BEFORE quality control.
+
+```{r loading the dataset, cache=TRUE}
+switch(params$arg01,
+	"tenx" = tmp.data <- Read10X(data.dir = params$arg02),
+  "dropseq" = tmp.data <- read.table(params$arg02, sep = "\t", header=T, row.names=1),
+  "mca" = tmp.data <- read.table(params$arg02, sep = "\t", header=T, row.names=1),
+  print("You have chosen undefined library parameter"))
+tmp <- CreateSeuratObject(counts = tmp.data, project = params$arg03, min.cells = 3)
+print(tmp)
+```
+
+# Quality Control
+
+The figure below shows violin plot and scatter plot for data before the quality control. From this figure, you should decide the parameters for quality control such as maximum `percent.mt` and minimum `nFeature_RNA`.
+
+```{r quality control, fig.cap=c("01-VlnPlot.png", "02-ScatterPlot.png"), cache=TRUE}
+tmp[["percent.mt"]] <- PercentageFeatureSet(tmp, pattern="^mt-")
+VlnPlot(tmp, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+png("01-VlnPlot.png")
+VlnPlot(tmp, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+dev.off()
+plot1 <- FeatureScatter(tmp, feature1 = "nCount_RNA", feature2 = "percent.mt")
+plot2 <- FeatureScatter(tmp, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+CombinePlots(plots = list(plot1, plot2))
+png("02-ScatterPlot.png", width=686,  height=480)
+CombinePlots(plots = list(plot1, plot2))
+dev.off()
+```
+
+You have chosen
+
+- **`r params$arg05`** as `nFeature_RNA_min`
+- **`r params$arg06`** as `nFeature_RNA_max`
+- **`r params$arg07`** as `nCount_RNA_min`
+- **`r params$arg08`** as `nCount_RNA_max`
+- **`r params$arg09`** as `percent.mt_max`.
+
+The output below shows the number of features and samples AFTER quality control.
+
+```{r after quality control}
+tmp <- subset(tmp, subset = nFeature_RNA > params$arg05 & nFeature_RNA < params$arg06 & nCount_RNA > params$arg07 & nCount_RNA < params$arg08 & percent.mt < params$arg09)
+print(tmp)
+```
+
+# Normalization
+
+The figures below show a subset of features that exhibit high cell-to-cell variation in the dataset. This subset (includes 2000 features) will be used in downstream analysis.
+
+```{r normalization, fig.width=10, fig.cap="03-VariableFeaturePlot.png", cache=TRUE}
+tmp <- NormalizeData(tmp, normalization.method = "LogNormalize", scale.factor = 10000)
+tmp <- FindVariableFeatures(tmp, selection.method = "vst", nfeatures = 2000)
+top10 <- head(VariableFeatures(tmp), 10)
+plot1 <- VariableFeaturePlot(tmp)
+plot2 <- LabelPoints(plot = plot1, points = top10, repel = TRUE)
+CombinePlots(plots = list(plot1, plot2))
+png("03-VariableFeaturePlot.png", width=800, height=480)
+CombinePlots(plots = list(plot1, plot2))
+dev.off()
+```
+
+# Scaling and Linear Dimensional Reduction
+
+The figures below show the result of scaling and PCA.
+
+```{r scaling and PCA, fig.cap=c("04-VizDimLoadings.png","05-DimPlot.png","06-DimHeatmap.png"), cache=TRUE}
+all.genes <- rownames(tmp)
+tmp <- ScaleData(tmp, features=all.genes)
+
+tmp <- RunPCA(tmp, features = VariableFeatures(object = tmp))
+print(tmp[["pca"]], dims=1:5, nfeatures=5)
+
+VizDimLoadings(tmp, dims=1:2, reduction="pca")
+png("04-VizDimLoadings.png")
+VizDimLoadings(tmp, dims=1:2, reduction="pca")
+dev.off()
+
+DimPlot(tmp, reduction="pca")
+png("05-DimPlot.png")
+DimPlot(tmp, reduction="pca")
+dev.off()
+
+DimHeatmap(tmp, dims=1, cells=500, balanced=TRUE)
+png("06-DimHeatmap.png")
+DimHeatmap(tmp, dims=1, cells=500, balanced=TRUE)
+dev.off()
+```
+
+```{r scaling and PCA 2, fig.cap="07-DimHeatmap_mul.png", fig.height=20, cache=TRUE}
+DimHeatmap(tmp, dims=1:15, cells=500, balanced=TRUE)
+png("07-DimHeatmap_mul.png", width=480, height=1000)
+DimHeatmap(tmp, dims=1:15, cells=500, balanced=TRUE)
+dev.off()
+
+```
+
+# Determining the Dimensionality of the Dataset
+
+From the figure below, you should determine significant PCs.
+
+```{r jackstraw and elbowplot, fig.cap=c("08-ElbowPlot.png", "09-ElbowPlot.png"), cache=TRUE}
+
+tmp <- JackStraw(tmp, num.replicate=100)
+tmp <- ScoreJackStraw(tmp, dims=1:20)
+
+JackStrawPlot(tmp, dims=1:20)
+png("08-JackStrawPlot.png")
+JackStrawPlot(tmp, dims=1:20)
+dev.off()
+
+ElbowPlot(tmp)
+png("09-ElbowPlot.png")
+ElbowPlot(tmp)
+dev.off()
+```
+
+# Clustering and Non-linear Dimensional Reduction
+
+You have chosen **`r params$arg10`** as `maximum PC`. The figure below shows the result of UMAP / tSNE.
+
+```{r clustering and UMAP, fig.cap="10-UMAPPlot.png", cache=TRUE}
+tmp <- FindNeighbors(tmp, dims=1:20)
+tmp <- FindClusters(tmp, resolution=0.8)
+
+head(Idents(tmp), 5)
+
+tmp <- RunUMAP(tmp, dims=1:20, umap.method="umap-learn", metric="correlation")
+DimPlot(tmp, reduction="umap", label=TRUE)
+png("10-UMAPPlot.png")
+DimPlot(tmp, reduction="umap", label=TRUE, height=1440, width=1440, res=216)
+dev.off()
+
+```
+
+# Finding Differentially Expressed Features {.tabset .tabset-fade}
+
+The list of differentially expressed features are shown below. This list could be used to assign cell type identity for each cluster.
+
+```{r DEG1, cache=TRUE}
+
+sample.markers <- FindAllMarkers(tmp, min.pct = 0.25, logfc.threshold = 0.25)
+sample.markers %>% group_by(cluster) %>% top_n(n = 2, wt = avg_logFC)
+markers10 <- sample.markers %>% group_by(cluster) %>% top_n(n = 10, wt = avg_logFC)
+write.table(sample.markers, file=paste(params$arg03,'_all_markers.tsv',sep=''), sep='\t', na='', row.names=T, col.names=NA, quote=F)
+write.table(markers10, file=paste(params$arg03,'_top10_markers.tsv',sep=''), sep='\t', na='', row.names=T, col.names=NA, quote=F)
+```
+
+```{r DEG2, comment=''}
+out <- NULL
+cluster_num <- length(levels(tmp)) - 1
+for (i in 0:cluster_num) {
+  tabName <- paste0("Cluster ",i)
+  tabSection <- paste0(
+    "\n## ", tabName, "\n",
+    "\n\n```{r}\n",
+    "head(FindMarkers(tmp,ident.1=", i, ",min.pct=0.25),15)\n",
+    "\n\n```\n\n"
+  )
+
+  out <- c(out, knit_expand(text=tabSection))
+}
+```
+
+`r paste(knit(text = out), collapse = '\n')`
+
+# Plotting Features
+
+```{r DEG plot, fig.cap=c("11-Interested_VlnPlot.png","12-Interested_FeaturePlot.png","13-Top10Marker_Heatmap.png"), fig.width=18, fig.height=20, cache=TRUE}
+interested_features <- c("Gif", "Lgr5", "Gper1", "Pgc", "Bhlha15", "Tnfrsf19", "Muc6", "Cd44", "Atp4a", "Atp4b", "Lrig1", "Mki67", "Tff2")
+
+VlnPlot(tmp, features=interested_features)
+png("11-Interested_VlnPlot.png",width=1440, height=1440)
+VlnPlot(tmp, features=interested_features)
+dev.off()
+
+FeaturePlot(tmp, features=interested_features)
+png("12-Interested_FeaturePlot.png",width=1440,height=1440)
+FeaturePlot(tmp, features=interested_features)
+dev.off()
+
+top10 <- sample.markers %>% group_by(cluster) %>% top_n(n = 10, wt = avg_logFC)
+DoHeatmap(tmp, features = top10$gene) + NoLegend()
+png("13-Top10Marker_Heatmap.png", width=1440, height=1440)
+DoHeatmap(tmp, features = top10$gene) + NoLegend()
+dev.off()
+```
+
+
+
+
+
+
+
+
+
+
+
+
