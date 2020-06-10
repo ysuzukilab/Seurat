@@ -185,7 +185,7 @@ Two 10x chromium output files.
 ### Usage  
 #### Basic usage      
 ```Bash
-$ Rscript integration_seurat.R --input_dir1 /path/to/dir1/ --input_dir2 /path/to/dir2/ -o /path/to/output -n1 name1 -n2 name2 -n 'custom_project_name'
+$ Rscript integration_seurat.R --input_dir1 /path/to/dir1/ --input_dir2 /path/to/dir2/ -o /path/to/output --name_dir1 name1 --name_dir2 name2 -n 'custom_project_name'
 ```  
 
 ## Integrating scATAC and scRNA
