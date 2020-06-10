@@ -25,10 +25,14 @@ Table of Contents
 options(repos="http://cran.ism.ac.jp")
 install.packages('dplyr')			
 install.packages('Seurat')
-install.packages("optparse")
+install.packages('optparse')
 install.packages('ggpubr')
+install.packages('cowplot')
+install.packages('grid')
+install.packages('ggplot2')
+install.packages('hdf5r')
 ```
-## Cell Cycle Analysis
+Downloading the package "hdf5r" may not work on ssh.
 
 
 ## 10x chromium single cell analysis
@@ -124,3 +128,112 @@ Options:
     -h, --help
         Shows this help message and exit
 ```
+
+## Cell Cycle Analysis
+cell_cycle_seurat.R automates the analysis shown in the [Seurat tutorial](https://satijalab.org/seurat/v3.0/cell_cycle_vignette.html 'Cell-Cycle Scoring and Regression'). However this does not regress out scores but only assigns cell-cycle scores.
+
+### Input  
+10x chromium output files.    
+./input_dir  
+	├--- barcodes.tsv.gz  
+	├--- features.tsv.gz  
+	└--- matrix.mtx.gz  
+### Output  
+- .png format plots  
+- .txt files  
+- .tsv files 
+
+## Usage  
+### Basic usage      
+```Bash
+$ Rscript cell_cycle_seurat.R -i /path/to/input_dir/ -o /path/to/output_dir/
+```  
+
+## Integrating datasets
+integration_seurat.R automates the analysis shown in the [Seurat tutorial](https://satijalab.org/seurat/v3.0/immune_alignment.html 'Tutorial: Integrating stimulated vs. control PBMC datasets to learn cell-type specific responses').
+
+### Input  
+Two 10x chromium output files.    
+./input_dir1  
+	├--- barcodes.tsv.gz  
+	├--- features.tsv.gz  
+	└--- matrix.mtx.gz  
+./input_dir2  
+	├--- barcodes.tsv.gz  
+	├--- features.tsv.gz  
+	└--- matrix.mtx.gz  
+
+### Output  
+- .png format plots  
+- .tsv files 
+- .rds files
+
+## Usage  
+### Basic usage      
+```Bash
+$ Rscript integration_seurat.R --input_dir1 /path/to/dir1/ --input_dir2 /path/to/dir2/ -o /path/to/output -n1 name1 -n2 name2 -n 'custom_project_name'
+```  
+
+## Integrating scATAC and scRNA
+atac_integration_seurat.R automates the analysis shown in the [Seurat tutorial](https://satijalab.org/seurat/v3.0/atacseq_integration_vignette.html 'PBMC scATAC-seq Vignette').
+
+### Input  
+- peak_matrix.h5 file
+- .gtf file
+- singlecell.csv file
+- scRNA.rds file
+
+### Output  
+- .png format plots  
+- .txt files 
+- .rds files
+
+## Usage  
+### Basic usage      
+```Bash
+$ Rscript atac_integration_seurat.R -a path/to/peak_bc_matrix.h5 -b path/to/gtf -c path/to/singlecell.csv -r path/to/scRNA.rds -o 'custom_ouput_name' -n 'custom_project_name'
+```  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
