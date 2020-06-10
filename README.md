@@ -1,6 +1,3 @@
-# Seurat  
-Repository for Seurat analysis
-
 Table of Contents
 =================
 
