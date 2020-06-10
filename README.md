@@ -6,33 +6,33 @@ Table of Contents
 =================
 
    * [Seurat](#seurat)
+   * [Table of Contents](#table-of-contents)
       * [Prerequisites - Install R packages](#prerequisites---install-r-packages)
       * [10x chromium single cell analysis](#10x-chromium-single-cell-analysis)
          * [Input](#input)
          * [Output](#output)
-      * [Usage](#usage)
-         * [Basic usage](#basic-usage)
-         * [Step 1: Initial run](#step-1-initial-run)
-         * [Step 2: Determine dimensions to use](#step-2-determine-dimensions-to-use)
-         * [Step 3: Determine cluster phenotypes](#step-3-determine-cluster-phenotypes)
-         * [Step 4: Final/Complete run](#step-4-finalcomplete-run)
-         * [Step 5: Optional: Identifying novel biomarkers](#step-5-optional-identifying-novel-biomarkers)
+         * [Usage](#usage)
+            * [Basic usage](#basic-usage)
+            * [Step 1: Initial run](#step-1-initial-run)
+            * [Step 2: Determine dimensions to use](#step-2-determine-dimensions-to-use)
+            * [Step 3: Determine cluster phenotypes](#step-3-determine-cluster-phenotypes)
+            * [Step 4: Final/Complete run](#step-4-finalcomplete-run)
+            * [Step 5: Optional: Identifying novel biomarkers](#step-5-optional-identifying-novel-biomarkers)
       * [Cell Cycle Analysis](#cell-cycle-analysis)
          * [Input](#input-1)
          * [Output](#output-1)
-      * [Usage](#usage-1)
-         * [Basic usage](#basic-usage-1)
+         * [Usage](#usage-1)
+            * [Basic usage](#basic-usage-1)
       * [Integrating datasets](#integrating-datasets)
          * [Input](#input-2)
          * [Output](#output-2)
-      * [Usage](#usage-2)
-         * [Basic usage](#basic-usage-2)
+         * [Usage](#usage-2)
+            * [Basic usage](#basic-usage-2)
       * [Integrating scATAC and scRNA](#integrating-scatac-and-scrna)
          * [Input](#input-3)
          * [Output](#output-3)
-      * [Usage](#usage-3)
-         * [Basic usage](#basic-usage-3)
-
+         * [Usage](#usage-3)
+            * [Basic usage](#basic-usage-3)
 
 ## Prerequisites - Install R packages
 ```R
@@ -63,22 +63,22 @@ Downloading the package "hdf5r" may not work on ssh.
 - .tsv files -> may be used as Cibersortx input  
 - .rds files  
 
-## Usage  
-### Basic usage      
+### Usage  
+#### Basic usage      
 ```Bash
 $ Rscript  seurat.R -i ./input_dir/ -o ./output_dir/ --project_name 'custom_project_name'     
 ```  
-### Step 1: Initial run 
+#### Step 1: Initial run 
 Visualise raw data and determine cutoff values to use for dropping low quality  data/cells.  
 ```Bash
 $ Rscript  seurat.R -i ./input_dir/ -o ./output_dir/ --project_name 'custom_project_name' --visualise_rawdata  
 ```  
-### Step 2: Determine dimensions to use
+#### Step 2: Determine dimensions to use
 According to your plots generated in step 1, assign integers to --nFeature_RNA_min, --nFeature_RNA_max and --percent.mt custom_value.
 ```Bash
 $ Rscript seurat.R  -i ./input_dir/ -o ./output_dir/ --nFeature_RNA_min custom_value --nFeature_RNA_max custom_value --percent.mt custom_value --project_name 'custom_project_name'  
 ```  
-### Step 3: Determine cluster phenotypes  
+#### Step 3: Determine cluster phenotypes  
 According to pca_*.png plots from Step2, reassign --pca_dims with the number of dimensions suitable for your dataset.  
 In addition, visualise the expression of previously identified genes by making a .txt file with such genes and specifying it under --marker_genes.  
 Note: If you do not have any a priori knowledge concerning markers, you may run without --marker_genes option.  
@@ -90,7 +90,7 @@ Example of marker gene file:
 ```Bash
 $ Rscript seurat.R  -i ./input_dir/ -o ./output_dir/ --nFeature_RNA_min custom_value --nFeature_RNA_max custom_value --percent.mt custom_value --project_name 'custom_project_name' --jackstrawed ./output_dir/custom_project_name_jackstrawed.rds --marker_genes ./path_to/marker_gene_file.txt --find_marker
 ```
-### Step 4: Final/Complete run
+#### Step 4: Final/Complete run
 Use deg_heatmap.png, deg_features.png and cluster_scatter.png to assign each cluster a phenotype. Assign Phenotype by making a .txt file where each row contains the phenotype of a cluster. Specify this file using --cluster_id.  
 Below is an example of text file. In this example, the cluster 1 represents Platelets, and cluster 2 represents CD14+ Mono cells.
 ```
@@ -101,7 +101,7 @@ CD14+ Mono
 ```Bash
 $ Rscript seurat.R  -i ./input_dir/ -o ./output_dir/ --nFeature_RNA_min custom_value --nFeature_RNA_max custom_value --percent.mt custom_value --project_name 'custom_project_name'  --jackstrawed ./output_dir/custom_project_name_jackstrawed.rds --marker_genes ./path_to/marker_gene_file.txt --cluster_id ./path_to/cluster_id.txt  
 ```
-### Step 5: Optional: Identifying novel biomarkers
+#### Step 5: Optional: Identifying novel biomarkers
 Use deg_heatmap.png, deg_features.png, *_all_markers.tsv and *_top10_markers.tsv to identify novel biomarkers OR to visualise the expression of known biomarkers. List the genes in interest in a .txt file and specify under --marker_genes.  
 ```Bash
 $ Rscript seurat.R  -i ./input_dir/ -o ./output_dir/ --nFeature_RNA_min custom_value --nFeature_RNA_max custom_value --percent.mt custom_value --project_name 'custom_project_name' --jackstrawed ./output_dir/custom_project_name_jackstrawed.rds --marker_genes ./path_to/marker_gene_file.txt --cluster_id ./path_to/cluster_id.txt
@@ -157,8 +157,8 @@ cell_cycle_seurat.R automates the analysis shown in the [Seurat tutorial](https:
 - .txt files  
 - .tsv files 
 
-## Usage  
-### Basic usage      
+### Usage  
+#### Basic usage      
 ```Bash
 $ Rscript cell_cycle_seurat.R -i /path/to/input_dir/ -o /path/to/output_dir/
 ```  
@@ -182,8 +182,8 @@ Two 10x chromium output files.
 - .tsv files 
 - .rds files
 
-## Usage  
-### Basic usage      
+### Usage  
+#### Basic usage      
 ```Bash
 $ Rscript integration_seurat.R --input_dir1 /path/to/dir1/ --input_dir2 /path/to/dir2/ -o /path/to/output -n1 name1 -n2 name2 -n 'custom_project_name'
 ```  
@@ -202,8 +202,8 @@ atac_integration_seurat.R automates the analysis shown in the [Seurat tutorial](
 - .txt files 
 - .rds files
 
-## Usage  
-### Basic usage      
+### Usage  
+#### Basic usage      
 ```Bash
 $ Rscript atac_integration_seurat.R -a path/to/peak_bc_matrix.h5 -b path/to/gtf -c path/to/singlecell.csv -r path/to/scRNA.rds -o 'custom_ouput_name' -n 'custom_project_name'
 ```  
