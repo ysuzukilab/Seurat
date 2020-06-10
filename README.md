@@ -1,6 +1,25 @@
 # Seurat
 Repository for Seurat analysis
 
+Table of Contents
+=================
+
+   * [Seurat](#seurat)
+      * [Prerequisites - Install R packages](#prerequisites---install-r-packages)
+      * [Cell Cycle Analysis](#cell-cycle-analysis)
+      * [10x chromium single cell analysis](#10x-chromium-single-cell-analysis)
+         * [Input](#input)
+         * [Output](#output)
+      * [Usage](#usage)
+         * [Basic usage](#basic-usage)
+         * [Step 1: Initial run](#step-1-initial-run)
+         * [Step 2: Determine dimensions to use](#step-2-determine-dimensions-to-use)
+         * [Step 3: Determine cluster phenotypes](#step-3-determine-cluster-phenotypes)
+         * [Step 4: Final/Complete run](#step-4-finalcomplete-run)
+         * [Step 5: Optional: Identifying novel biomarkers](#step-5-optional-identifying-novel-biomarkers)
+
+
+
 ## Prerequisites - Install R packages
 ```R
 options(repos="http://cran.ism.ac.jp")
