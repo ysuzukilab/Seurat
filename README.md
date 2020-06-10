@@ -1,8 +1,12 @@
+# Seurat 
+Repository for Seurat anaysis
 
-Table of Contents  
-=================  
-<!--ts-->
-      * [Prerequisites - Install R packages](#prerequisites---install-r-packages)  
+
+Table of Contents
+=================
+
+   * [Seurat](#seurat)
+      * [Prerequisites - Install R packages](#prerequisites---install-r-packages)
       * [10x chromium single cell analysis](#10x-chromium-single-cell-analysis)
          * [Input](#input)
          * [Output](#output)
@@ -28,7 +32,7 @@ Table of Contents
          * [Output](#output-3)
       * [Usage](#usage-3)
          * [Basic usage](#basic-usage-3)
-<!--te-->
+
 
 ## Prerequisites - Install R packages
 ```R
